@@ -66,10 +66,8 @@ public class MP3Player {
     public static void main(String[] args) {
         try {
             MP3Player player = new MP3Player(new FileInputStream("mp3/" + args[0]));
-            int counter = 0;
             while (true) {
-                player.playFrames(100);
-                counter += 100;
+                player.playFrames(60);
             }
         } catch (JavaLayerException e) {
             System.err.println(e);
