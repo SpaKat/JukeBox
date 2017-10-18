@@ -1,4 +1,5 @@
 import javazoom.jl.decoder.JavaLayerException;
+import mp3player.MP3Player;
 
 import java.io.FileInputStream;
 import java.io.IOException;
