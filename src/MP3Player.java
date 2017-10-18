@@ -2,24 +2,16 @@ import javazoom.jl.decoder.*;
 import javazoom.jl.player.AudioDevice;
 import javazoom.jl.player.FactoryRegistry;
 
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 
 public class MP3Player {
-
-    // NOTE future use
-    // private int currentFrame = 0;
 
     final private Bitstream bitstream;
     final private Decoder decoder;
 
     private AudioDevice audioDevice;
 
-    // NOTE future use
-    // private boolean closed = false;
     private boolean complete = false;
-    private boolean paused = true;
 
     public MP3Player(InputStream in) throws JavaLayerException {
         this.bitstream = new Bitstream(in);
@@ -32,32 +24,29 @@ public class MP3Player {
         this.audioDevice.open(this.decoder);
     }
 
-    public void play() throws JavaLayerException {
-        this.playFrames(Integer.MAX_VALUE);
+    public void play(PlayerState state) throws JavaLayerException {
+        this.playFrames(state, Integer.MAX_VALUE);
     }
 
-    public boolean playFrames(int numFrames) throws JavaLayerException {
+    public void playFrames(PlayerState state, int numFrames) throws JavaLayerException {
         while (numFrames > 0 && !this.complete) {
-            if (this.paused) {
-                // TODO pause
+            if (state.isStopped()) {
+                this.complete = true;
+            } else if (state.isPaused()) {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+
+                }
             } else {
                 this.complete = !this.decodeFrame();
+                numFrames--;
             }
         }
 
         if (this.complete) {
             this.audioDevice.flush();
         }
-
-        return true;
-    }
-
-    public void togglePause() {
-        this.paused = !this.paused;
-    }
-
-    public boolean isPaused() {
-        return this.paused;
     }
 
     private boolean decodeFrame() throws JavaLayerException {
@@ -80,17 +69,5 @@ public class MP3Player {
             throw new JavaLayerException("Error decoding audio frame: " + e);
         }
         return true;
-    }
-
-    public static void main(String[] args) {
-        try {
-            MP3Player player = new MP3Player(new FileInputStream("mp3/" + args[0]));
-
-
-        } catch (JavaLayerException e) {
-            System.err.println(e);
-        } catch (IOException e) {
-            System.err.println(e);
-        }
     }
 }

@@ -1,48 +1,45 @@
-import javazoom.jl.decoder.JavaLayerException;
-import javazoom.jl.player.Player;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
 public class REPL {
 
-    private String input = "";
-    private MP3Player mp3Player;
+    private PlayerController playerController;
     private boolean exit = false;
     private BufferedReader sysin;
 
-    REPL(MP3Player mp3Player) {
-        this.mp3Player = mp3Player;
+    public REPL(MP3Player mp3Player) {
         this.sysin = new BufferedReader(new InputStreamReader(System.in));
+        this.playerController = new PlayerController(mp3Player);
         System.out.println("Welcome to MP3test");
-        System.out.print("(MP3test) >> ");
 
         while (!exit) {
             this.read();
         }
     }
 
-
     private void read() {
+        String input;
+        printLeader();
         try {
-            this.input = sysin.readLine().toLowerCase();
+            input = sysin.readLine().toLowerCase();
         } catch (IOException e) {
             e.printStackTrace();
             return;
         }
         if (input.contentEquals("play")) {
-            try {
-                if (this.mp3Player.isPaused())
-                    this.mp3Player.togglePause();
-                this.mp3Player.play();
-            } catch (JavaLayerException e) {
-                System.err.println(e);
-            }
+            this.playerController.setPaused(false);
+        } else if (input.contentEquals("stop")) {
+            this.playerController.stop();
+        } else if (input.contentEquals("pause")) {
+            this.playerController.setPaused(true);
+        } else if (input.contentEquals("exit")) {
+            this.playerController.stop();
+            this.exit = true;
         }
-        if (input.contentEquals("stop")) {
-            //this.mp3Player.close();
-        }
-        this.input = "";
+    }
+
+    private void printLeader() {
+        System.out.print("(MP3test) >> ");
     }
 }
